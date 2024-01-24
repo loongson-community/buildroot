@@ -124,7 +124,8 @@ ifeq ($(BR2_PACKAGE_LINUX_FIRMWARE_RTL_RTW88),y)
 LINUX_FIRMWARE_FILES += \
 	rtw88/rtw8723d_fw.bin \
 	rtw88/rtw8822b_fw.bin \
-	rtw88/rtw8822c_fw.bin
+	rtw88/rtw8822c_fw.bin \
+	rtw88/rtw8822c_wow_fw.bin
 LINUX_FIRMWARE_ALL_LICENSE_FILES += LICENCE.rtlwifi_firmware.txt
 endif
 

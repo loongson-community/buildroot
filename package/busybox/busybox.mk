@@ -223,18 +223,118 @@ define BUSYBOX_SET_INIT
 endef
 
 ifeq ($(BR2_TARGET_GENERIC_GETTY),y)
+
+ifeq ($(BR2_TARGET_GENERIC_GETTY_AUTOLOGIN),y)
+
+define BUSYBOX_SET_GETTY
+	$(SED) '/# GENERIC_SERIAL$$/s~^.*#~$(SYSTEM_GETTY_PORT)::respawn:/sbin/getty -L $(SYSTEM_GETTY_OPTIONS) $(SYSTEM_GETTY_PORT) $(SYSTEM_GETTY_BAUDRATE) $(SYSTEM_GETTY_TERM) -l ls-autologin -n #~' \
+		$(TARGET_DIR)/etc/inittab
+endef
+
+else
+
 define BUSYBOX_SET_GETTY
 	$(SED) '/# GENERIC_SERIAL$$/s~^.*#~$(SYSTEM_GETTY_PORT)::respawn:/sbin/getty -L $(SYSTEM_GETTY_OPTIONS) $(SYSTEM_GETTY_PORT) $(SYSTEM_GETTY_BAUDRATE) $(SYSTEM_GETTY_TERM) #~' \
 		$(TARGET_DIR)/etc/inittab
 endef
+
+endif # BR2_TARGET_GENERIC_GETTY_AUTOLOGIN
+
 else
+
+ifeq ($(BR2_TARGET_GENERIC_GETTY_AUTOLOGIN),y)
+
+define BUSYBOX_SET_GETTY
+	$(SED) '/# GENERIC_SERIAL$$/s~^.*#~#ttyS0::respawn:/sbin/getty -L ttyS0 115200 vt100 -l ls-autologin -n #~' $(TARGET_DIR)/etc/inittab
+endef
+
+else
+
 define BUSYBOX_SET_GETTY
 	$(SED) '/# GENERIC_SERIAL$$/s~^.*#~#ttyS0::respawn:/sbin/getty -L ttyS0 115200 vt100 #~' $(TARGET_DIR)/etc/inittab
 endef
+
+endif # BR2_TARGET_GENERIC_GETTY_AUTOLOGIN
+
 endif # BR2_TARGET_GENERIC_GETTY
+
+ifeq ($(BR2_TARGET_GENERIC_GETTY_AUTOLOGIN),y)
+define BUSYBOX_SET_AUTO_LOGIN
+	cd $(TARGET_DIR)/bin && echo "#! /bin/sh" > ls-autologin && echo "/bin/login -f root" >> ls-autologin && chmod a+x ls-autologin
+endef
+endif # BR2_TARGET_GENERIC_GETTY_AUTOLOGIN
+
+ifeq ($(BR2_TARGET_TTY0_GETTY_ENABLE),y)
+
+ifeq ($(BR2_TARGET_GENERIC_GETTY_AUTOLOGIN),y)
+
+define BUSYBOX_SET_GETTY_TTY0
+	$(SED) '/# tty0-console$$/d' $(TARGET_DIR)/etc/inittab
+	$(SED) '/^ttyS*/a tty0::respawn:/sbin/getty -L $(SYSTEM_GETTY_OPTIONS) tty0 $(SYSTEM_GETTY_BAUDRATE) $(SYSTEM_GETTY_TERM) -l ls-autologin -n # tty0-console' \
+		$(TARGET_DIR)/etc/inittab
+endef
+
+else
+
+define BUSYBOX_SET_GETTY_TTY0
+	$(SED) '/# tty0-console$$/d' $(TARGET_DIR)/etc/inittab
+	$(SED) '/^ttyS*/a tty0::respawn:/sbin/getty -L $(SYSTEM_GETTY_OPTIONS) tty0 $(SYSTEM_GETTY_BAUDRATE) $(SYSTEM_GETTY_TERM) # tty0-console' \
+		$(TARGET_DIR)/etc/inittab
+endef
+
+endif # BR2_TARGET_GENERIC_GETTY_AUTOLOGIN
+
+else
+
+define BUSYBOX_SET_GETTY_TTY0
+	$(SED) '/# tty0-console$$/d' $(TARGET_DIR)/etc/inittab
+endef
+
+endif # BR2_TARGET_TTY0_GETTY_ENABLE
+
+ifeq ($(BR2_BUSYBOX_UBIFS_NAND_DATA_PART),y)
+
+ifeq ($(BR2_INIT_BUSYBOX),y)
+define BUSYBOX_NAND_DATA_MOUNT_SERVICE_INITD
+	cp $(TOPDIR)/package/busybox/ubi_mount_data_s/initd/S91ubi_mount $(TARGET_DIR)/etc/init.d/
+	chmod a+x $(TARGET_DIR)/etc/init.d/S91ubi_mount
+endef
+endif
+
+ifeq ($(BR2_INIT_SYSTEMD),y)
+define BUSYBOX_NAND_DATA_MOUNT_SERVICE_SYSTEMD
+	cp $(TOPDIR)/package/busybox/ubi_mount_data_s/systemd/nand_data_mount.server $(TARGET_DIR)/usr/lib/systemd/system/
+	cd $(TARGET_DIR)/usr/lib/systemd/system/multi-user.target.wants && ln -b -s -f ../nand_data_mount.server nand_data_mount.server
+endef
+endif
+
+ifeq ($(BR2_BUSYBOX_UBIFS_NAND_DATA_PART_DELAY),y)
+define BUSYBOX_NAND_DATA_MOUNT_SERVICE_DELAY
+	cd $(TARGET_DIR)/root/init_shell/ && $(SED) 's/#sleep 5/sleep 5/g' ubi_mount_data.sh
+endef
+endif
+
+define BUSYBOX_NAND_DATA_MOUNT_SERVICE
+	mkdir -p $(TARGET_DIR)/root/init_shell
+	cp $(TOPDIR)/package/busybox/ubi_mount_data_s/ubi_mount_data.sh $(TARGET_DIR)/root/init_shell/
+	chmod a+x $(TARGET_DIR)/root/init_shell/ubi_mount_data.sh
+
+	$(BUSYBOX_NAND_DATA_MOUNT_SERVICE_INITD)
+	$(BUSYBOX_NAND_DATA_MOUNT_SERVICE_SYSTEMD)
+	$(BUSYBOX_NAND_DATA_MOUNT_SERVICE_DELAY)
+endef
+
+endif
+
 BUSYBOX_TARGET_FINALIZE_HOOKS += BUSYBOX_SET_GETTY
 
+BUSYBOX_TARGET_FINALIZE_HOOKS += BUSYBOX_SET_GETTY_TTY0
+
+BUSYBOX_TARGET_FINALIZE_HOOKS += BUSYBOX_SET_AUTO_LOGIN
+
 BUSYBOX_TARGET_FINALIZE_HOOKS += SYSTEM_REMOUNT_ROOT_INITTAB
+
+BUSYBOX_TARGET_FINALIZE_HOOKS += BUSYBOX_NAND_DATA_MOUNT_SERVICE
 
 endif # BR2_INIT_BUSYBOX
 
@@ -367,6 +467,24 @@ define BUSYBOX_BUILD_CMDS
 	$(BUSYBOX_MAKE_ENV) $(MAKE) $(BUSYBOX_MAKE_OPTS) -C $(@D)
 endef
 
+ifeq ($(BR2_INIT_SYSTEMD),y)
+define CHANGE_LINUXRC_INIT_CMDS
+	cd $(TARGET_DIR) && rm linuxrc && ln -s /sbin/init linuxrc
+endef
+else
+define CHANGE_LINUXRC_INIT_CMDS
+endef
+endif
+
+ifeq ($(BR2_BUSYBOX_PROFILE), y)
+define BUSYBOX_INSTALL_ETC_PROFILE
+	cp $(@D)/profile $(TARGET_DIR)/etc/profile
+endef
+else
+define BUSYBOX_INSTALL_ETC_PROFILE
+endef
+endif
+
 define BUSYBOX_INSTALL_TARGET_CMDS
 	# Use the 'noclobber' install rule, to prevent BusyBox from overwriting
 	# any full-blown versions of apps installed by other packages.
@@ -376,6 +494,8 @@ define BUSYBOX_INSTALL_TARGET_CMDS
 	$(BUSYBOX_INSTALL_UDHCPC_SCRIPT)
 	$(BUSYBOX_INSTALL_ZCIP_SCRIPT)
 	$(BUSYBOX_INSTALL_MDEV_CONF)
+	$(CHANGE_LINUXRC_INIT_CMDS)
+	$(BUSYBOX_INSTALL_ETC_PROFILE)
 endef
 
 # Install the sysvinit scripts, for the moment, but not those that already

@@ -323,6 +323,39 @@ menuconfig BR2_TARGET_GENERIC_GETTY
 	bool "Run a getty (login prompt) after boot"
 	default y
 
+config BR2_TARGET_GENERIC_GETTY_AUTOLOGIN
+	bool "all getty auto login as root after boot"
+	depends on BR2_INIT_BUSYBOX || BR2_INIT_SYSTEMD
+	default y
+	help
+	  as file serial@getty.service or getty@.service
+	  you can set ExecStart var
+	  -a root switch -o '-p -- \\u'
+	  you can switch to autologin
+	  else disable autologin
+	  when 221011 add busybox auto login support
+	  busybox support just getty add param about -l and -n
+	  -l ls-autologin
+	  ls-autologin just will instead of /bin/login
+	  and login have a param is -f
+	  login -f root
+	  will login be root
+	  so ls-autologin content is login -f -root
+
+config BR2_TARGET_TTY0_GETTY_ENABLE
+	bool "enable tty0 getty"
+	depends on BR2_INIT_BUSYBOX || BR2_INIT_SYSTEMD
+	default y
+	help
+	  select this function
+	  will create getty@tty0.service in rootfs /usr/lib/systemd/system/
+	  just a link file which link /usr/lib/systemd/system/getty@.service
+	  so when rootfs boot
+	  if board have a screen, will see a screen up a getty and can operate it like serial getty
+	  when 221011 add busybox support
+	  busybox as init process
+	  need add new line in /etc/inittab like a line which contain ttyS*::*
+
 if BR2_TARGET_GENERIC_GETTY
 config BR2_TARGET_GENERIC_GETTY_PORT
 	string "TTY port"
@@ -617,5 +650,35 @@ config BR2_ROOTFS_POST_SCRIPT_ARGS
 	  first argument to each post-build or post-image script is the
 	  target directory / images directory. The arguments in this
 	  option will be passed *after* those.
+
+config BR2_BUSYBOX_PROFILE
+	bool "generate /etc/profile"
+	depends on BR2_PACKAGE_BUSYBOX
+	default y
+	help
+	  generate a /etc/profile
+
+config BR2_BUSYBOX_UBIFS_NAND_DATA_PART
+	bool "nand data part mount"
+	select BR2_PACKAGE_MTD
+	select BR2_PACKAGE_MTD_UBIMKVOL
+	select BR2_PACKAGE_MTD_UBIFORMAT
+	select BR2_PACKAGE_MTD_UBIDETACH
+	select BR2_PACKAGE_MTD_UBIATTACH
+	default n
+	help
+	  if nand too big and scan bad block too slow
+	  can spilt nand kernel rootfs data(about mtdparts property in cmdline)
+	  rootfs just small and boot fast
+	  and data part mount after system boot
+
+config BR2_BUSYBOX_UBIFS_NAND_DATA_PART_DELAY
+	bool "nand data part mount delay 5s"
+	depends on BR2_BUSYBOX_UBIFS_NAND_DATA_PART
+	default y
+	help
+	  if want to run a process after boot
+	  nand data part mount will capture nand controller
+	  process will start slower
 
 endmenu

@@ -607,6 +607,17 @@ define SYSTEMD_INSTALL_SERVICE_TTY
 		$(SED) 's/115200/$(BR2_TARGET_GENERIC_GETTY_BAUDRATE),115200/' $(TARGET_DIR)/lib/systemd/system/serial-getty@.service; \
 		$(SED) 's/115200/$(BR2_TARGET_GENERIC_GETTY_BAUDRATE),115200/' $(TARGET_DIR)/lib/systemd/system/console-getty@.service; \
 		$(SED) 's/115200/$(BR2_TARGET_GENERIC_GETTY_BAUDRATE),115200/' $(TARGET_DIR)/lib/systemd/system/container-getty@.service; \
+	fi; \
+	if [ "$(BR2_TARGET_GENERIC_GETTY_AUTOLOGIN)" = "y" ] ; \
+	then \
+		$(SED) 's/-o[[:space:]]'"'"'-p[[:space:]]--[[:space:]]\\\\u'"'"'/-a root/' $(TARGET_DIR)/lib/systemd/system/getty@.service; \
+		$(SED) 's/-o[[:space:]]'"'"'-p[[:space:]]--[[:space:]]\\\\u'"'"'/-a root/' $(TARGET_DIR)/lib/systemd/system/serial-getty@.service; \
+		$(SED) 's/-o[[:space:]]'"'"'-p[[:space:]]--[[:space:]]\\\\u'"'"'/-a root/' $(TARGET_DIR)/lib/systemd/system/console-getty@.service; \
+		$(SED) 's/-o[[:space:]]'"'"'-p[[:space:]]--[[:space:]]\\\\u'"'"'/-a root/' $(TARGET_DIR)/lib/systemd/system/container-getty@.service; \
+	fi; \
+	if [ "$(BR2_TARGET_TTY0_GETTY_ENABLE)" = "y"  ] ; \
+	then \
+		cd $(TARGET_DIR)/lib/systemd/system && ln -s getty@.service getty@tty0.service; \
 	fi
 endef
 endif

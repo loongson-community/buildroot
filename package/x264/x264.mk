@@ -4,12 +4,12 @@
 #
 ################################################################################
 
-X264_VERSION = 20191217-2245
-X264_SITE = http://download.videolan.org/x264/snapshots
-X264_SOURCE = x264-snapshot-$(X264_VERSION).tar.bz2
+X264_VERSION = 0.155.2917+git0a84d98
+X264_SITE = ftp://10.120.1.5/tmp/others
+X264_SOURCE = x264-$(X264_VERSION).tar.gz
 X264_LICENSE = GPL-2.0+
 X264_DEPENDENCIES = host-pkgconf
-X264_LICENSE_FILES = COPYING
+#X264_LICENSE_FILES = COPYING
 X264_INSTALL_STAGING = YES
 X264_CONF_OPTS = --disable-avs --disable-lavf --disable-swscale
 

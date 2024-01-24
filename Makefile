@@ -758,6 +758,10 @@ target-finalize: $(PACKAGES) $(TARGET_DIR) host-finalize
 	find $(TARGET_DIR)/usr/{lib,share}/ -name '*.cmake' -print0 | xargs -0 rm -f
 	find $(TARGET_DIR)/lib/ $(TARGET_DIR)/usr/lib/ $(TARGET_DIR)/usr/libexec/ \
 		\( -name '*.a' -o -name '*.la' -o -name '*.prl' \) -print0 | xargs -0 rm -f
+ifeq ($(BR2_PACKAGE_GIT_INFO_LSGD),y)
+	rm -r ./output/build/git_info_lsgd/.stamp*
+endif
+
 ifneq ($(BR2_PACKAGE_GDB),y)
 	rm -rf $(TARGET_DIR)/usr/share/gdb
 endif
@@ -785,11 +789,11 @@ endif
 		{ echo "ERROR: we shouldn't have a /etc/ld.so.conf.d directory"; exit 1; } || true
 	mkdir -p $(TARGET_DIR)/etc
 	( \
-		echo "NAME=Buildroot"; \
+		echo "NAME=LoongOS(GD)"; \
 		echo "VERSION=$(BR2_VERSION_FULL)"; \
-		echo "ID=buildroot"; \
+		echo "ID=LoongOS"; \
 		echo "VERSION_ID=$(BR2_VERSION)"; \
-		echo "PRETTY_NAME=\"Buildroot $(BR2_VERSION)\"" \
+		echo "PRETTY_NAME=\"LoongOS $(BR2_VERSION)\"" \
 	) >  $(TARGET_DIR)/usr/lib/os-release
 	ln -sf ../usr/lib/os-release $(TARGET_DIR)/etc
 
@@ -1232,6 +1236,42 @@ check-package:
 
 include docs/manual/manual.mk
 -include $(foreach dir,$(BR2_EXTERNAL_DIRS),$(sort $(wildcard $(dir)/docs/*/*.mk)))
+
+list-configs:
+	@echo  '1.全量系统的编译配置'
+	@echo  '板卡配置名 					对应适用板卡'
+	@echo  'loongson2k1000_jinlong_defconfig 		ls2k1000mips版本的星云板卡或者其他ls2k1000mips版本的板卡通用配置'
+	@echo  'loongson2k1000la_jinlong_defconfig 		ls2k1000LA版本的星云板卡或者其他ls2k1000LA版本的板卡通用配置'
+	@echo  'loongson2k500_defconfig 			ls2k500板卡通用配置（串口2作为调试串口）'
+	@echo  'loongson2k500_mini_dp_defconfig 		ls2k500先锋板卡通用配置（串口2作为调试串口）'
+	@echo  ''
+	@echo  '2.小型系统的编译配置'
+	@echo  '板卡配置名 					对应适用板卡'
+	@echo  'loongson2k1000_jinlong_mini_defconfig 		ls2k1000mips版本的星云板卡或者其他ls2k1000mips版本的板卡小型系统通用配置'
+	@echo  'loongson2k1000la_jinlong_mini_defconfig 	ls2k1000LA版本的星云板卡或者其他ls2k1000LA版本的板卡小型系统通用配置'
+	@echo  'loongson2k500_mini_defconfig 			ls2k500板卡小型系统通用配置（串口2作为调试串口）'
+	@echo  'loongson2k500_mini_dp_mini_defconfig 		ls2k500先锋板卡小型系统通用配置（串口2作为调试串口）'
+	@echo  ''
+	@echo  '3.ramdisk的编译配置'
+	@echo  '板卡配置名 					对应适用板卡'
+	@echo  'loongson2k1000la_jinlong_ramdisk_defconfig 	ls2k1000LA版本的星云板卡或者其他ls2k1000LA版本的板卡ramdisk编译通用配置'
+	@echo  'loongson2k500_ramdisk_defconfig 		ls2k500板卡ramdisk编译通用配置（串口2作为调试串口）'
+	@echo	''
+	@echo  '4.快速启动系统的编译配置'
+	@echo  '板卡配置名 					对应适用板卡'
+	@echo  'loongson2k1000la_jinlong_fastboot_defconfig 	ls2k1000LA版本的星云板卡或者其他ls2k1000LA版本的板卡快速启动系统通用配置'
+	@echo  'loongson2k500_fastboot_defconfig 		ls2k500板卡快速启动系统通用配置（串口2作为调试串口）'
+	@echo  'loongson2k500_mini_dp_fastboot_defconfig 	ls2k500先锋板卡快速启动系统通用配置（串口2作为调试串口）'
+	@echo	''
+	@echo  '5.最小化纯busybox的编译配置((整个系统大小:8.9M))'
+	@echo  '板卡配置名 					对应适用板卡'
+	@echo  'loongson2k1000la_jinlong_pure_busybox_defconfig	ls2k1000LA星云板卡或者其他ls2k1000LA版本的板卡编译通用配置'
+	@echo  'loongson2k500__pure_busybox_defconfig		ls2k500先锋板卡编译通用配置'
+	@echo	''
+	@echo  '6.python3的编译配置'
+	@echo  '板卡配置名 					对应适用板卡'
+	@echo  'loongson2k1000la_jinlong_py3_defconfig		ls2k1000LA版本的星云板卡或者其他ls2k1000LA版本的板卡编译python3配置'
+	@echo  'loongson2k500_mini_dp_py3_defconfig		ls2k500板卡编译python3配置（串口2作为调试串口）'
 
 .PHONY: $(noconfig_targets)
 

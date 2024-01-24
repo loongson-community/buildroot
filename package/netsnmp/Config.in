@@ -9,6 +9,22 @@ config BR2_PACKAGE_NETSNMP
 
 if BR2_PACKAGE_NETSNMP
 
+config BR2_PACKAGE_NETSNMP_STATIC
+	bool "build static lib"
+	default n
+	help
+		build static lib
+
+if BR2_PACKAGE_NETSNMP_STATIC
+
+config BR2_PACKAGE_NETSNMP_ONLY_STATIC
+	bool "just build static lib only"
+	default n
+	help
+		build static lib not build dynamic lib
+
+endif
+
 config BR2_PACKAGE_NETSNMP_SERVER
 	bool "server"
 	default y

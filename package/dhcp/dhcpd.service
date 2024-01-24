@@ -4,6 +4,9 @@ After=network.target
 
 [Service]
 Type=forking
+StartLimitIntervalSec=0
+Restart=always
+RestartSec=2
 PIDFile=/run/dhcpd.pid
 ExecStart=/usr/sbin/dhcpd -q -pf /run/dhcpd.pid $OPTIONS $INTERFACES
 KillSignal=SIGINT

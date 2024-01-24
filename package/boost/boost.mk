@@ -4,7 +4,15 @@
 #
 ################################################################################
 
+
+ifeq ($(BR2_PACKAGE_BOOST_VERSION_1_67),y)
+BOOST_VERSION = 1.67.0
+BUILD_BOOST_BJAM_PATH = ./tools/build/src/engine/bin.linuxx86_64/bjam
+else
 BOOST_VERSION = 1.75.0
+BUILD_BOOST_BJAM_PATH = ./tools/build/src/engine/bjam
+endif
+
 BOOST_SOURCE = boost_$(subst .,_,$(BOOST_VERSION)).tar.bz2
 BOOST_SITE = https://boostorg.jfrog.io/artifactory/main/release/$(BOOST_VERSION)/source
 BOOST_INSTALL_STAGING = YES
@@ -138,7 +146,7 @@ define BOOST_CONFIGURE_CMDS
 endef
 
 define BOOST_BUILD_CMDS
-	(cd $(@D) && $(TARGET_MAKE_ENV) ./tools/build/src/engine/bjam -j$(PARALLEL_JOBS) -q \
+	(cd $(@D) && $(TARGET_MAKE_ENV) $(BUILD_BOOST_BJAM_PATH) -j$(PARALLEL_JOBS) -q \
 	--user-config=$(@D)/user-config.jam \
 	$(BOOST_OPTS) \
 	--ignore-site-config \
@@ -155,7 +163,7 @@ define BOOST_INSTALL_TARGET_CMDS
 endef
 
 define BOOST_INSTALL_STAGING_CMDS
-	(cd $(@D) && $(TARGET_MAKE_ENV) ./tools/build/src/engine/bjam -j$(PARALLEL_JOBS) -q \
+	(cd $(@D) && $(TARGET_MAKE_ENV) $(BUILD_BOOST_BJAM_PATH) -j$(PARALLEL_JOBS) -q \
 	--user-config=$(@D)/user-config.jam \
 	$(BOOST_OPTS) \
 	--prefix=$(STAGING_DIR)/usr \

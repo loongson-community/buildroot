@@ -44,6 +44,20 @@ config BR2_PACKAGE_BOOST_LAYOUT_VERSIONED
 
 endchoice
 
+choice
+	prompt "Version"
+	default BR2_PACKAGE_BOOST_VERSION_1_75
+	help
+	  Selects version of Boost
+
+config BR2_PACKAGE_BOOST_VERSION_1_75
+	bool "1.75.0"
+
+config BR2_PACKAGE_BOOST_VERSION_1_67
+	bool "1.67.0"
+
+endchoice
+
 config BR2_PACKAGE_BOOST_LAYOUT
 	string
 	default "system" if BR2_PACKAGE_BOOST_LAYOUT_SYSTEM

@@ -7,3 +7,5 @@ config BR2_PACKAGE_LIBXKBCOMMON
 	  specification.
 
 	  http://xkbcommon.org/
+
+source "package/libxkbcommon_rules/Config.in"

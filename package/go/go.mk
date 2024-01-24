@@ -4,9 +4,8 @@
 #
 ################################################################################
 
-GO_VERSION = 1.15.15
-GO_SITE = https://storage.googleapis.com/golang
-GO_SOURCE = go$(GO_VERSION).src.tar.gz
+GO_SOURCE = golang-1.20_1.20.2.orig.tar.gz
+GO_SITE = http://pkg.loongnix.cn/loongnix/pool/main/g/golang-1.20
 
 GO_LICENSE = BSD-3-Clause
 GO_LICENSE_FILES = LICENSE
@@ -61,6 +60,8 @@ else ifeq ($(BR2_mips64el),y)
 GO_GOARCH = mips64le
 else ifeq ($(BR2_s390x),y)
 GO_GOARCH = s390x
+else ifeq ($(BR2_loongarch64),y)
+GO_GOARCH = loong64
 endif
 
 # For the convienience of target packages.

@@ -4,9 +4,10 @@
 #
 ################################################################################
 
-FFMPEG_VERSION = 4.3.2
-FFMPEG_SOURCE = ffmpeg-$(FFMPEG_VERSION).tar.xz
-FFMPEG_SITE = http://ffmpeg.org/releases
+FFMPEG_VERSION = 4.1.6
+FFMPEG_SOURCE = ffmpeg_$(FFMPEG_VERSION).orig.tar.gz
+#FFMPEG_SITE = http://ffmpeg.org/releases
+FFMPEG_SITE = https://pkg.loongnix.cn/loongnix/pool/main/f/ffmpeg
 FFMPEG_INSTALL_STAGING = YES
 
 FFMPEG_LICENSE = LGPL-2.1+, libjpeg license
@@ -420,12 +421,12 @@ else
 FFMPEG_CONF_OPTS += --disable-libx265
 endif
 
-ifeq ($(BR2_PACKAGE_DAV1D),y)
-FFMPEG_CONF_OPTS += --enable-libdav1d
-FFMPEG_DEPENDENCIES += dav1d
-else
-FFMPEG_CONF_OPTS += --disable-libdav1d
-endif
+#ifeq ($(BR2_PACKAGE_DAV1D),y)
+#FFMPEG_CONF_OPTS += --enable-libdav1d
+#FFMPEG_DEPENDENCIES += dav1d
+#else
+#FFMPEG_CONF_OPTS += --disable-libdav1d
+#endif
 
 ifeq ($(BR2_X86_CPU_HAS_MMX),y)
 FFMPEG_CONF_OPTS += --enable-x86asm

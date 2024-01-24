@@ -90,9 +90,7 @@ define NETWORK_MANAGER_INSTALL_INIT_SYSV
 endef
 
 define NETWORK_MANAGER_INSTALL_INIT_SYSTEMD
-	ln -sf /usr/lib/systemd/system/NetworkManager.service \
-		$(TARGET_DIR)/etc/systemd/system/dbus-org.freedesktop.NetworkManager.service
-
+	cd $(TARGET_DIR)/usr/lib/systemd/system/ && ln -sf NetworkManager.service dbus-org.freedesktop.NetworkManager.service
 endef
 
 $(eval $(autotools-package))
